@@ -1,4 +1,19 @@
-export function TaskFilters() {
+/**
+ * Componente TaskFilters - Filtros para la lista de tareas
+ * EC2 F1 A6 - Filtrado dinámico con callbacks
+ */
+import React from 'react';
+
+interface TaskFiltersProps {
+  currentFilter: 'all' | 'pending' | 'in-progress' | 'completed';
+  onFilterChange: (filter: 'all' | 'pending' | 'in-progress' | 'completed') => void;
+}
+
+export function TaskFilters({ currentFilter, onFilterChange }: TaskFiltersProps) {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFilterChange(e.target.value as 'all' | 'pending' | 'in-progress' | 'completed');
+  };
+
   return (
     <section className="panel" aria-labelledby="filters-title">
       <div className="section-heading">
@@ -20,9 +35,14 @@ export function TaskFilters() {
 
         <div className="field">
           <label htmlFor="status-filter">Estado</label>
-          <select id="status-filter" defaultValue="all">
+          <select 
+            id="status-filter" 
+            value={currentFilter}
+            onChange={handleSelectChange}
+          >
             <option value="all">Todas</option>
             <option value="pending">Pendientes</option>
+            <option value="in-progress">En progreso</option>
             <option value="completed">Completadas</option>
           </select>
         </div>
@@ -38,8 +58,7 @@ export function TaskFilters() {
       </div>
 
       <p className="helper-text">
-        Los controles son demostrativos y todavía no modifican
-        los resultados.
+        El filtro por estado está activo. Búsqueda y ordenamiento en desarrollo.
       </p>
     </section>
   );

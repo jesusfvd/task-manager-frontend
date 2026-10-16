@@ -1,13 +1,22 @@
-type TaskStatus = 'pending' | 'completed';
+/**
+ * Componente TaskItem - Representa una tarea individual
+ * EC2 F1 A6 - Modelado y renderizado dinámico
+ */
+import { Task } from '../models/Task';
 
 interface TaskItemProps {
-  title: string;
-  status: TaskStatus;
+  task: Task;
 }
 
-export function TaskItem({ title, status }: TaskItemProps) {
+export function TaskItem({ task }: TaskItemProps) {
+  const { title, status } = task;
+  
   const statusLabel =
-    status === 'completed' ? 'Completada' : 'Pendiente';
+    status === 'completed' 
+      ? 'Completada' 
+      : status === 'in-progress'
+      ? 'En progreso'
+      : 'Pendiente';
 
   return (
     <article

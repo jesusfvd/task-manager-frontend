@@ -304,3 +304,29 @@ p { margin-top: 0; }
 
   .task-item__actions button { flex: 1 1 8rem; }
 }
+
+/* ========================================
+   A6: Estado vacío - Renderizado condicional
+   ======================================== */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* ========================================
+   A6: Estilos para estado "En progreso"
+   ======================================== */
+.task-item--in-progress {
+  border-left-color: #f59e0b;
+}
+
+.status-badge--in-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.summary-card--in-progress {
+  background-color: #fef3c7;
+}
