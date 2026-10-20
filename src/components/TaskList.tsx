@@ -1,63 +1,68 @@
 /**
  * Componente TaskList - Lista de tareas con renderizado dinámico
- * EC2 F1 A6 - Implementa map() con key prop y renderizado condicional
+ * EC2 F2 A7 - Transmite funciones de App a cada TaskItem
  */
-import { Task } from '../models/Task';
+import type { Task } from '../models/Task';
 import { TaskItem } from './TaskItem';
 
 interface TaskListProps {
   tasks: Task[];
-  filterStatus?: 'all' | 'pending' | 'in-progress' | 'completed';
+  onToggleStatus: (id: string) => void;
+  onEditTask: (id: string, title: string) => void;
+  onDeleteTask: (id: string) => void;
 }
 
-export function TaskList({ tasks, filterStatus = 'all' }: TaskListProps) {
-  // Filtrado dinámico de tareas
-  const filteredTasks = tasks.filter((task) => {
-    if (filterStatus === 'all') return true;
-    return task.status === filterStatus;
-  });
+export function TaskList({
+  tasks,
+  onToggleStatus,
+  onEditTask,
+  onDeleteTask,
+}: TaskListProps) {
+  const resultLabel =
+    tasks.length === 1
+      ? '1 tarea'
+      : `${tasks.length} tareas`;
 
-  // Renderizado condicional: estado vacío
-  if (filteredTasks.length === 0) {
-    return (
-      <section className="panel" aria-labelledby="task-list-title">
-        <div className="section-heading">
-          <div>
-            <p className="section-heading__eyebrow">Actividades</p>
-            <h2 id="task-list-title">Tareas registradas</h2>
-          </div>
-          <span className="result-count">0 tareas</span>
-        </div>
-
-        <div className="empty-state">
-          <p>
-            {filterStatus === 'all'
-              ? 'No hay tareas registradas. ¡Crea tu primera tarea!'
-              : `No hay tareas con estado "${filterStatus}".`}
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  // Renderizado dinámico con map() y key prop
   return (
-    <section className="panel" aria-labelledby="task-list-title">
+    <section
+      className="panel"
+      aria-labelledby="task-list-title"
+    >
       <div className="section-heading">
         <div>
-          <p className="section-heading__eyebrow">Actividades</p>
-          <h2 id="task-list-title">Tareas registradas</h2>
+          <p className="section-heading__eyebrow">
+            Actividades
+          </p>
+          <h2 id="task-list-title">
+            Tareas registradas
+          </h2>
         </div>
         <span className="result-count">
-          {filteredTasks.length} {filteredTasks.length === 1 ? 'tarea' : 'tareas'}
+          {resultLabel}
         </span>
       </div>
 
-      <div className="task-list" role="list">
-        {filteredTasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
-      </div>
+      {tasks.length === 0 ? (
+        <div className="empty-state" role="status">
+          <h3>No hay tareas registradas</h3>
+          <p>
+            Utiliza el formulario para registrar
+            una nueva actividad.
+          </p>
+        </div>
+      ) : (
+        <div className="task-list" role="list">
+          {tasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggleStatus={onToggleStatus}
+              onEditTask={onEditTask}
+              onDeleteTask={onDeleteTask}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

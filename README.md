@@ -1,10 +1,10 @@
-# 📋 Gestor de Tareas - React + TypeScript
+# 📋 Administrador de Tareas - Frontend
 
-Aplicación web para gestión de tareas desarrollada con React 18, TypeScript y Vite.
+Aplicación web interactiva para gestión de tareas desarrollada con React 18, TypeScript y Vite.
 
 **Asignatura:** Diseño Frontend con Frameworks  
-**Actividades:** EC2 F1 A5 y A6  
-**Estudiante:** [Tu nombre]
+**Actividades:** EC2 F1 A5, A6 y EC2 F2 A7  
+**Proyecto:** Administrador de tareas con operaciones CRUD
 
 ---
 
@@ -12,289 +12,492 @@ Aplicación web para gestión de tareas desarrollada con React 18, TypeScript y 
 
 ```bash
 # Instalar dependencias
-npm install
+pnpm install
 
 # Modo desarrollo
-npm run dev
+pnpm dev
+# o
+npx vite
 
-# Build para producción
-npm run build
+# Compilar para producción
+pnpm build
 
-# Preview del build
-npm run preview
-
-# Linting
-npm run lint
+# Validar código
+pnpm lint
 ```
 
 **URL desarrollo:** http://localhost:5173
 
 ---
 
+## ✨ Alcance Actual (Actividad 7)
+
+La aplicación administra una colección local de tareas mediante estado de React. Actualmente permite:
+
+- ✅ **Registrar tareas** - Agregar nuevas tareas con título validado
+- ✅ **Consultar la colección** - Ver todas las tareas registradas
+- ✅ **Completar y reabrir tareas** - Cambiar el estado entre pending/completed
+- ✅ **Editar títulos** - Modificar el texto de las tareas
+- ✅ **Cancelar edición** - Restaurar el título original si se cancela
+- ✅ **Eliminar con confirmación** - Borrar tareas con diálogo de confirmación
+- ✅ **Calcular resumen automáticamente** - Estadísticas en tiempo real
+- ✅ **Mostrar colección vacía** - Mensaje cuando no hay tareas
+
+⚠️ **Los cambios permanecen en memoria y se reinician al recargar la página.**
+
+---
+
+## 🎯 Operaciones CRUD
+
+| Operación | Acción | Implementación |
+|-----------|--------|----------------|
+| **Create** | Registrar una tarea | Formulario controlado con `spread` |
+| **Read** | Mostrar la colección | Renderizado con `map()` |
+| **Update** | Cambiar estado o título | `map()` y `spread` inmutables |
+| **Delete** | Eliminar una tarea | `filter()` con confirmación |
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
-src/
-├── components/          # Componentes React
-│   ├── AppHeader.tsx
-│   ├── AppFooter.tsx
-│   ├── TaskForm.tsx
-│   ├── TaskFilters.tsx
-│   ├── TaskSummary.tsx
-│   ├── TaskList.tsx
-│   └── TaskItem.tsx
-├── models/             # 🆕 Interfaces TypeScript (A6)
-│   └── Task.ts
-├── data/               # 🆕 Datos semilla (A6)
-│   └── seedTasks.ts
-├── styles/
-│   └── index.css
-├── App.tsx             # Componente raíz con estado
-└── main.tsx
+task-manager-frontend/
+├── docs/
+│   ├── preguntas-cierre-ec2-f2-a7.md    # 14 preguntas respondidas
+│   └── RESUMEN-ACTIVIDAD-7.md           # Guía de estudio
+├── src/
+│   ├── components/
+│   │   ├── AppHeader.tsx                # Encabezado
+│   │   ├── TaskForm.tsx                 # ✨ Formulario controlado
+│   │   ├── TaskFilters.tsx              # Filtros (deshabilitados A7)
+│   │   ├── TaskSummary.tsx              # Resumen dinámico
+│   │   ├── TaskList.tsx                 # Lista con funciones CRUD
+│   │   └── TaskItem.tsx                 # ✨ Item con edición inline
+│   ├── models/
+│   │   └── Task.ts                      # ✨ Interfaz actualizada
+│   ├── data/
+│   │   └── seedTasks.ts                 # 5 tareas iniciales
+│   ├── styles/
+│   │   └── index.css                    # ✨ Estilos con edición
+│   ├── App.tsx                          # ✨ Estado y funciones CRUD
+│   └── main.tsx
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 ---
 
-## ✨ Actividad 5 (A5) - Componentes React
+## 🔑 Conceptos Implementados
 
-### Características implementadas:
+### 1. **Estado de React (useState)**
 
-- ✅ 7 componentes React funcionales
-- ✅ Props tipadas con TypeScript
-- ✅ Estructura semántica con HTML5
-- ✅ CSS modular y responsive
-- ✅ Accesibilidad con ARIA labels
-- ✅ Diseño mobile-first
+```tsx
+const [tasks, setTasks] = useState<Task[]>(() => [...seedTasks]);
+```
 
-### Componentes:
+- Almacena la colección de tareas
+- Se mantiene entre renderizados
+- Actualiza la UI automáticamente
 
-1. **AppHeader** - Encabezado con navegación
-2. **TaskForm** - Formulario para crear tareas
-3. **TaskFilters** - Filtros de búsqueda y estado
-4. **TaskSummary** - Tarjetas con estadísticas
-5. **TaskList** - Lista de tareas
-6. **TaskItem** - Tarjeta individual de tarea
-7. **AppFooter** - Pie de página
+### 2. **Formulario Controlado**
 
----
+```tsx
+const [title, setTitle] = useState('');
 
-## 🎯 Actividad 6 (A6) - Renderizado Dinámico
+<input
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+/>
+```
 
-### Nuevas características:
+- El estado controla el valor del input
+- React es la fuente única de verdad
+- Permite validación en tiempo real
 
-#### 1. **Interfaz Task con TypeScript**
+### 3. **Eventos y Callbacks**
 
-```typescript
-interface Task {
-  id: string;
-  title: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  createdAt: Date;
+```tsx
+// App define y pasa funciones
+<TaskForm onAddTask={handleAddTask} />
+
+// TaskForm las ejecuta
+function handleSubmit(event) {
+  event.preventDefault();
+  onAddTask(normalizedTitle);
 }
 ```
 
-#### 2. **Array de 12 Tareas Semilla**
-
-- 3 completadas
-- 4 en progreso
-- 5 pendientes
-
-#### 3. **Renderizado con map() y key única**
+### 4. **Actualización Inmutable**
 
 ```tsx
-{filteredTasks.map((task) => (
-  <TaskItem key={task.id} task={task} />
-))}
-```
+// ❌ NUNCA
+tasks.push(newTask);
 
-#### 4. **Filtrado Dinámico**
-
-```typescript
-const filteredTasks = tasks.filter((task) => {
-  if (filterStatus === 'all') return true;
-  return task.status === filterStatus;
-});
-```
-
-#### 5. **Renderizado Condicional**
-
-- Mensaje cuando la lista está vacía
-- Mensajes específicos por filtro activo
-
-#### 6. **Cálculos Dinámicos**
-
-```typescript
-const totalTasks = tasks.length;
-const completedTasks = tasks.filter(t => t.status === 'completed').length;
-const inProgressTasks = tasks.filter(t => t.status === 'in-progress').length;
-const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+// ✅ SIEMPRE
+setTasks([newTask, ...tasks]);
 ```
 
 ---
 
-## 🏗️ Arquitectura
+## 🛠️ Implementación CRUD Detallada
+
+### CREATE - Agregar Tarea
+
+```tsx
+function handleAddTask(title: string) {
+  const now = new Date().toISOString();
+  
+  const newTask: Task = {
+    id: crypto.randomUUID(),  // ID único
+    title,
+    status: 'pending',
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  setTasks((currentTasks) => [
+    newTask,           // Nueva al inicio
+    ...currentTasks,   // Resto del array
+  ]);
+}
+```
+
+**Operador:** `spread (...)`  
+**Resultado:** Nuevo array sin modificar el original
+
+---
+
+### UPDATE - Toggle Status
+
+```tsx
+function handleToggleStatus(id: string) {
+  const now = new Date().toISOString();
+
+  setTasks((currentTasks) =>
+    currentTasks.map((task) => {
+      if (task.id !== id) return task;
+      
+      return {
+        ...task,
+        status: task.status === 'pending' ? 'completed' : 'pending',
+        updatedAt: now,
+      };
+    })
+  );
+}
+```
+
+**Método:** `map()`  
+**Lógica:** Solo modifica la tarea con el ID coincidente
+
+---
+
+### UPDATE - Editar Título
+
+```tsx
+function handleEditTask(id: string, title: string) {
+  const now = new Date().toISOString();
+
+  setTasks((currentTasks) =>
+    currentTasks.map((task) =>
+      task.id === id
+        ? { ...task, title, updatedAt: now }
+        : task
+    )
+  );
+}
+```
+
+**Preserva:** `id` y `createdAt`  
+**Actualiza:** `title` y `updatedAt`
+
+---
+
+### DELETE - Eliminar con Confirmación
+
+```tsx
+function handleDeleteTask(id: string) {
+  const selectedTask = tasks.find(task => task.id === id);
+  
+  if (!selectedTask) return;
+
+  const shouldDelete = window.confirm(
+    `¿Eliminar la tarea "${selectedTask.title}"?`
+  );
+  
+  if (!shouldDelete) return;
+
+  setTasks((currentTasks) =>
+    currentTasks.filter((task) => task.id !== id)
+  );
+}
+```
+
+**Método:** `filter()`  
+**Resultado:** Array sin la tarea eliminada
+
+---
+
+## 🏗️ Arquitectura y Flujo de Datos
 
 ```
-App.tsx (Estado centralizado)
-  ├── useState(seedTasks) ────┐
-  └── useState(currentFilter) │
-      ↓ Props                 │
-  ├─ TaskSummary ←────────────┤
-  │   └─ Calcula estadísticas │
-  ├─ TaskFilters              │
-  │   └─ Callback: setFilter  │
-  └─ TaskList ←───────────────┘
-      ├─ filter() por estado
-      ├─ map() con keys
-      └─ TaskItem (individual)
+┌─────────────────────────────────────────┐
+│              App.tsx                    │
+│  ┌───────────────────────────────────┐  │
+│  │ const [tasks, setTasks] = ...     │  │ ← Fuente de verdad
+│  │                                   │  │
+│  │ handleAddTask()                   │  │
+│  │ handleToggleStatus()              │  │
+│  │ handleEditTask()                  │  │
+│  │ handleDeleteTask()                │  │
+│  └───────────────────────────────────┘  │
+└──────────┬───────────────────┬──────────┘
+           │                   │
+    ┌──────▼─────┐      ┌─────▼──────┐
+    │ TaskForm   │      │ TaskList   │
+    │            │      │            │
+    │ onAddTask()│      │ tasks[]    │
+    └────────────┘      │ onToggle() │
+                        │ onEdit()   │
+                        │ onDelete() │
+                        └─────┬──────┘
+                              │
+                        ┌─────▼──────┐
+                        │ TaskItem   │
+                        │            │
+                        │ Ejecuta    │
+                        │ funciones  │
+                        └────────────┘
 ```
+
+**Principio:** Flujo unidireccional de datos (top-down)
+
+---
+
+## 📊 Modelo de Datos
+
+```typescript
+interface Task {
+  id: string;              // UUID único
+  title: string;           // Máximo 120 caracteres
+  status: 'pending' | 'completed';
+  createdAt: string;       // ISO 8601
+  updatedAt: string;       // ISO 8601
+}
+```
+
+---
+
+## ✅ Validaciones Implementadas
+
+| Campo | Validación | Implementación |
+|-------|-----------|----------------|
+| Título | No vacío | `required` + `disabled={!normalizedTitle}` |
+| Título | Máximo 120 chars | `maxLength={120}` |
+| Título | Sin espacios extra | `title.trim()` |
+| Eliminación | Confirmación | `window.confirm()` |
 
 ---
 
 ## 🎨 Tecnologías
 
-- **React 18** - Biblioteca UI
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool y dev server
-- **ESLint** - Linter
-- **CSS3** - Estilos (sin frameworks)
+- **React 18.3** - Biblioteca UI con hooks
+- **TypeScript 5.5** - Tipado estático
+- **Vite 5.4** - Build tool y dev server
+- **ESLint 9** - Linter configurado
+- **CSS3 puro** - Sin frameworks
 
 ---
 
-## 📦 Dependencias Principales
-
-```json
-{
-  "react": "^18.3.1",
-  "react-dom": "^18.3.1",
-  "typescript": "^5.6.3",
-  "vite": "^5.4.10"
-}
-```
-
----
-
-## 🔧 Scripts Disponibles
+## 📦 Scripts Disponibles
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm run dev` | Inicia servidor de desarrollo |
-| `npm run build` | Compila para producción |
-| `npm run preview` | Preview del build |
-| `npm run lint` | Ejecuta ESLint |
+| `pnpm dev` | Servidor de desarrollo en puerto 5173 |
+| `pnpm build` | Compila TypeScript y genera bundle |
+| `pnpm lint` | Valida código con ESLint |
+| `pnpm preview` | Preview del build de producción |
 
 ---
 
-## ✅ Preguntas de Cierre (A6)
+## 🧪 Pruebas Funcionales
 
-### 1. ¿Por qué React necesita key con map()?
+### Checklist de Verificación
 
-React usa keys para identificar qué elementos cambiaron, agregaron o eliminaron. Sin keys, React no puede trackear correctamente los elementos, causando:
-- Rendimiento degradado
-- Bugs de estado (componentes reutilizan estado incorrecto)
-- Animaciones incorrectas
+- [ ] **Agregar tarea:** Escribe "Tarea de prueba" y presiona "Agregar tarea"
+  - ✓ Aparece al inicio de la lista
+  - ✓ Estado inicial: "Pendiente"
+  - ✓ Campo se limpia automáticamente
+  - ✓ Resumen se actualiza (+1 total, +1 pendiente)
 
-### 2. Index vs. ID único como key
+- [ ] **Validación:** Intenta agregar con campo vacío
+  - ✓ Botón "Agregar tarea" está deshabilitado
 
-| Aspecto | Index | ID único |
-|---------|-------|----------|
-| Estabilidad | Cambia al reordenar | Siempre igual |
-| Performance | Puede causar re-renders | Óptimo |
-| Bugs | Componentes reciben estado incorrecto | Estado correcto |
-| Cuándo usar | Listas estáticas | Listas dinámicas ✅ |
+- [ ] **Completar tarea:** Presiona "Completar" en una tarea pendiente
+  - ✓ Insignia cambia a "Completada"
+  - ✓ Estilo visual cambia
+  - ✓ Resumen se actualiza (-1 pendiente, +1 completada)
 
-### 3. Ventajas de cálculos dinámicos
+- [ ] **Reabrir tarea:** Presiona "Reabrir" en una tarea completada
+  - ✓ Vuelve a "Pendiente"
+  - ✓ Resumen se actualiza
 
-1. **Single source of truth** - Datos vienen del array tasks
-2. **Sincronización automática** - Stats se actualizan al modificar tareas
-3. **Menos errores** - No hay riesgo de datos desincronizados
-4. **Mantenibilidad** - Un solo lugar para la lógica
-5. **Escalabilidad** - Funciona con 3 o 300 tareas
+- [ ] **Editar título:** Presiona "Editar", cambia el texto y "Guardar"
+  - ✓ Muestra formulario inline
+  - ✓ El nuevo título se guarda
+  - ✓ Fecha de actualización cambia
 
-### 4. Renderizado condicional mejora UX
+- [ ] **Cancelar edición:** Presiona "Editar", modifica y "Cancelar"
+  - ✓ Título original se conserva
+  - ✓ Cambios se descartan
 
-1. **Evita confusión** - Usuario entiende que no hay datos
-2. **Guía al usuario** - Sugiere acciones ("¡Crea tu primera tarea!")
-3. **Contexto del filtro** - Mensaje específico por filtro activo
-4. **Accesibilidad** - Mensajes leídos por screen readers
-5. **Feedback inmediato** - Usuario comprende el estado de la app
+- [ ] **Eliminar (cancelar):** Presiona "Eliminar" y cancela
+  - ✓ Aparece confirmación
+  - ✓ Tarea permanece en la lista
 
-### 5. Importancia del tipado con TypeScript
+- [ ] **Eliminar (confirmar):** Presiona "Eliminar" y acepta
+  - ✓ Tarea desaparece
+  - ✓ Resumen se actualiza
 
-1. **Detección temprana de errores** - Antes de ejecutar
-2. **Documentación automática** - Interfaces documentan contratos
-3. **IntelliSense** - Autocompletado en el editor
-4. **Refactoring seguro** - TypeScript señala cambios necesarios
-5. **Colaboración** - El equipo sabe qué espera cada componente
-6. **Prevención de runtime errors** - Bugs eliminados en desarrollo
+- [ ] **Estado vacío:** Elimina todas las tareas
+  - ✓ Mensaje "No hay tareas registradas"
+  - ✓ Resumen muestra ceros
+
+- [ ] **Recargar página:** Presiona F5
+  - ✓ Vuelven las 5 tareas iniciales (comportamiento esperado)
+
+- [ ] **Consola del navegador:** Revisa durante el uso
+  - ✓ Sin errores
+  - ✓ Sin warnings
 
 ---
 
-## 📊 Estadísticas del Proyecto
+## 🔄 Progreso del Proyecto
 
-- **Componentes React:** 7
-- **Archivos TypeScript:** 11
-- **Tareas de ejemplo:** 12
-- **Estados de tarea:** 3 (pending, in-progress, completed)
-- **Líneas de código:** ~1,200
+| Actividad | Estado | Descripción |
+|-----------|--------|-------------|
+| **A5** | ✅ Completado | Componentes React estáticos |
+| **A6** | ✅ Completado | Modelado y renderizado dinámico |
+| **A7** | ✅ Completado | Estado local, eventos y CRUD |
+| **A8** | ⏳ Pendiente | Validación, búsqueda y localStorage |
+| **EC3** | ⏳ Pendiente | Integración con API REST |
+
+---
+
+## 📚 Recursos de Estudio
+
+Dentro de la carpeta `docs/` encontrarás:
+
+1. **preguntas-cierre-ec2-f2-a7.md**
+   - 14 preguntas respondidas en detalle
+   - Ejemplos de código explicados
+   - Conceptos fundamentales
+
+2. **RESUMEN-ACTIVIDAD-7.md**
+   - Resumen ejecutivo completo
+   - Puntos clave para explicar oralmente
+   - Errores comunes y soluciones
+   - Tabla comparativa CRUD
 
 ---
 
 ## 🎓 Aprendizajes Clave
 
-### A5 - Componentes React
-- Composición de componentes
-- Props y tipado con TypeScript
-- Estructura semántica HTML5
-- CSS responsive sin frameworks
-- Accesibilidad web (ARIA)
+### Actividad 7 - Estado y CRUD
 
-### A6 - Renderizado Dinámico
-- Arrays en React con map()
-- Prop key única y su importancia
-- Filtrado dinámico con filter()
-- Renderizado condicional
-- Estado centralizado con useState
-- Flujo unidireccional de datos
-- Cálculos derivados del estado
+1. **useState** - Hook para agregar memoria a componentes
+2. **Formulario controlado** - React controla el valor del input
+3. **Props drilling** - Pasar funciones a componentes hijos
+4. **Inmutabilidad** - Crear nuevos arrays/objetos, nunca modificar directamente
+5. **CRUD inmutable** - `spread`, `map()`, `filter()`
+6. **Fuente de verdad** - Un solo lugar almacena cada dato
+7. **preventDefault** - Evitar recarga de página en formularios
+8. **Estado local vs global** - Cuándo usar cada uno
+9. **Función actualizadora** - `setState(prev => ...)` cuando dependes del estado anterior
+10. **window.confirm()** - Confirmación nativa para acciones destructivas
 
 ---
 
-## 🚀 Resultado Final
+## ⚙️ Configuración del Entorno
 
-- ✅ 12 tareas renderizadas dinámicamente
-- ✅ Filtrado funcional por estado
-- ✅ Estadísticas que se actualizan automáticamente
-- ✅ Estado vacío con mensajes contextuales
-- ✅ Props tipadas con TypeScript
-- ✅ Keys únicas en todas las listas
-- ✅ Código mantenible y escalable
+```bash
+# Node.js
+node --version  # v18 o superior
+
+# PNPM
+pnpm --version  # v8 o superior
+
+# Git
+git --version   # Cualquier versión reciente
+```
+
+---
+
+## 🚀 Próximos Pasos (Actividad 8)
+
+- ✨ Mensajes de validación detallados
+- 🔍 Búsqueda por título en tiempo real
+- 🎯 Filtros funcionales por estado
+- 📊 Ordenamiento (recientes, antiguas, alfabético)
+- 💾 **Persistencia con localStorage**
+- 🔄 Sincronización automática
 
 ---
 
 ## 📝 Convenciones de Commits
 
-```
-chore: iniciar proyecto
-feat: implementar componentes (A5)
-feat: implementar renderizado dinámico (A6)
-docs: actualizar documentación
+```bash
+feat: agregar formulario controlado (A7)
+feat: implementar operaciones CRUD (A7)
+feat: agregar estado local con useState (A7)
+style: agregar estilos para edición inline (A7)
+docs: actualizar README con información de A7
+docs: responder preguntas de cierre A7
 ```
 
 ---
 
-## 👨‍💻 Desarrollo
+## 🐛 Solución de Problemas
 
+### El servidor no inicia
 ```bash
-# Clonar repositorio
-git clone <tu-repo>
-cd task-manager-frontend
-
-# Instalar dependencias
-npm install
-
-# Ejecutar en desarrollo
-npm run dev
+# Limpiar y reinstalar
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 ```
 
-**¡El proyecto está listo para desarrollo y entrega!** 🎉
+### Advertencia de esbuild
+```bash
+# Usar npx vite directamente
+npx vite
+```
+
+### Errores de TypeScript
+```bash
+# Verificar tipos
+pnpm tsc --noEmit
+```
+
+---
+
+## 📄 Licencia
+
+Proyecto educativo - Universidad de El Salvador  
+Diseño Frontend con Frameworks - 2024
+
+---
+
+## 👨‍💻 Autor
+
+[Tu nombre completo]  
+[Tu carnet]  
+Universidad de El Salvador
+
+---
+
+**✨ La aplicación está completamente funcional con operaciones CRUD en memoria.**
+
+**📚 Consulta los documentos en `docs/` para preparar tu explicación oral.**
+
+**🎉 ¡Éxito en tu presentación!**

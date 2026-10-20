@@ -1,43 +1,121 @@
 /**
  * Componente principal App
- * EC2 F1 A6 - Orquestación con estado y datos dinámicos
+ * EC2 F2 A7 - Estado local, eventos y operaciones CRUD
  */
 import { useState } from 'react';
 import { AppHeader } from './components/AppHeader';
-import { TaskForm } from './components/TaskForm';
 import { TaskFilters } from './components/TaskFilters';
-import { TaskSummary } from './components/TaskSummary';
+import { TaskForm } from './components/TaskForm';
 import { TaskList } from './components/TaskList';
-import { AppFooter } from './components/AppFooter';
+import { TaskSummary } from './components/TaskSummary';
 import { seedTasks } from './data/seedTasks';
+import type { Task } from './models/Task';
 
-function App() {
-  // Estado: lista de tareas (inicializada con datos semilla)
-  const [tasks] = useState(seedTasks);
-  
-  // Estado: filtro actual
-  const [currentFilter, setCurrentFilter] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
+export default function App() {
+  const [tasks, setTasks] = useState<Task[]>(
+    () => [...seedTasks],
+  );
+
+  function handleAddTask(title: string) {
+    const now = new Date().toISOString();
+
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      title,
+      status: 'pending',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    setTasks((currentTasks) => [
+      newTask,
+      ...currentTasks,
+    ]);
+  }
+
+  function handleToggleStatus(id: string) {
+    const now = new Date().toISOString();
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => {
+        if (task.id !== id) {
+          return task;
+        }
+
+        return {
+          ...task,
+          status:
+            task.status === 'pending'
+              ? 'completed'
+              : 'pending',
+          updatedAt: now,
+        };
+      }),
+    );
+  }
+
+  function handleEditTask(
+    id: string,
+    title: string,
+  ) {
+    const now = new Date().toISOString();
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              title,
+              updatedAt: now,
+            }
+          : task,
+      ),
+    );
+  }
+
+  function handleDeleteTask(id: string) {
+    const selectedTask = tasks.find(
+      (task) => task.id === id,
+    );
+
+    if (!selectedTask) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `¿Eliminar la tarea "${selectedTask.title}"?`,
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setTasks((currentTasks) =>
+      currentTasks.filter((task) => task.id !== id),
+    );
+  }
 
   return (
-    <div className="app-container">
+    <div className="app-shell">
       <AppHeader />
 
-      <main className="main-content">
-        <TaskForm />
-        <TaskFilters 
-          currentFilter={currentFilter}
-          onFilterChange={setCurrentFilter}
-        />
+      <main className="app-main">
+        <TaskForm onAddTask={handleAddTask} />
+        <TaskFilters />
         <TaskSummary tasks={tasks} />
-        <TaskList 
-          tasks={tasks} 
-          filterStatus={currentFilter}
+        <TaskList
+          tasks={tasks}
+          onToggleStatus={handleToggleStatus}
+          onEditTask={handleEditTask}
+          onDeleteTask={handleDeleteTask}
         />
       </main>
 
-      <AppFooter />
+      <footer className="app-footer">
+        <div className="app-footer__content">
+          <p>Administrador de tareas - Frontend EC2</p>
+        </div>
+      </footer>
     </div>
   );
 }
-
-export default App;

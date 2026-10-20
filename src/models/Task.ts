@@ -1,6 +1,6 @@
 /**
  * Interfaz que define la estructura de una tarea
- * EC2 F1 A6 - Modelado y renderizado dinámico
+ * EC2 F2 A7 - Estado local, eventos y operaciones CRUD
  */
 export interface Task {
   /** Identificador único de la tarea */
@@ -10,10 +10,13 @@ export interface Task {
   title: string;
   
   /** Estado actual de la tarea */
-  status: 'pending' | 'in-progress' | 'completed';
+  status: 'pending' | 'completed';
   
-  /** Fecha de creación de la tarea */
-  createdAt: Date;
+  /** Fecha de creación de la tarea (ISO string) */
+  createdAt: string;
+  
+  /** Fecha de última actualización de la tarea (ISO string) */
+  updatedAt: string;
 }
 
 /**
