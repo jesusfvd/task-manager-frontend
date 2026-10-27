@@ -1,55 +1,119 @@
 /**
- * Componente TaskFilters - Filtros de tareas
- * EC2 F2 A7 - Deshabilitado temporalmente
+ * Componente TaskFilters - Controles de búsqueda, filtro y ordenamiento
+ * EC2 F3 A8 - Consulta controlada de tareas
  */
-export function TaskFilters() {
+import type {
+  TaskFilter,
+  TaskSort,
+} from '../models/task-view.types';
+
+interface TaskFiltersProps {
+  query: string;
+  filter: TaskFilter;
+  sortBy: TaskSort;
+  resultCount: number;
+  onQueryChange: (value: string) => void;
+  onFilterChange: (value: TaskFilter) => void;
+  onSortChange: (value: TaskSort) => void;
+  onClear: () => void;
+}
+
+export function TaskFilters({
+  query,
+  filter,
+  sortBy,
+  resultCount,
+  onQueryChange,
+  onFilterChange,
+  onSortChange,
+  onClear,
+}: TaskFiltersProps) {
+  const hasActiveCriteria =
+    query.trim() !== '' ||
+    filter !== 'all' ||
+    sortBy !== 'updated-desc';
+
+  const resultLabel =
+    resultCount === 1
+      ? '1 resultado visible.'
+      : `${resultCount} resultados visibles.`;
+
   return (
     <section
       className="panel"
-      aria-labelledby="filters-title"
+      aria-labelledby="task-filters-title"
     >
       <div className="section-heading">
         <div>
           <p className="section-heading__eyebrow">
             Consulta
           </p>
-          <h2 id="filters-title">
+          <h2 id="task-filters-title">
             Buscar y organizar
           </h2>
         </div>
       </div>
 
       <div className="filters-grid">
-        <div>
-          <label htmlFor="search">Buscar por título</label>
+        <label className="filter-field">
+          <span>Buscar por título</span>
           <input
-            id="search"
-            type="text"
-            placeholder="Escribe una palabra clave"
-            disabled
+            type="search"
+            value={query}
+            placeholder="Ejemplo: documentación"
+            onChange={(event) =>
+              onQueryChange(event.target.value)
+            }
           />
-        </div>
+        </label>
 
-        <div>
-          <label htmlFor="filter-status">Estado</label>
-          <select id="filter-status" disabled>
+        <label className="filter-field">
+          <span>Estado</span>
+          <select
+            value={filter}
+            onChange={(event) =>
+              onFilterChange(
+                event.target.value as TaskFilter,
+              )
+            }
+          >
             <option value="all">Todas</option>
             <option value="pending">Pendientes</option>
             <option value="completed">Completadas</option>
           </select>
-        </div>
+        </label>
 
-        <div>
-          <label htmlFor="sort-by">Orden</label>
-          <select id="sort-by" disabled>
-            <option value="recent">Más recientes</option>
-            <option value="oldest">Más antiguas</option>
+        <label className="filter-field">
+          <span>Ordenar por</span>
+          <select
+            value={sortBy}
+            onChange={(event) =>
+              onSortChange(event.target.value as TaskSort)
+            }
+          >
+            <option value="updated-desc">
+              Actualización reciente
+            </option>
+            <option value="created-desc">
+              Creación reciente
+            </option>
+            <option value="title-asc">
+              Título A a Z
+            </option>
           </select>
-        </div>
+        </label>
+
+        <button
+          type="button"
+          onClick={onClear}
+          disabled={!hasActiveCriteria}
+        >
+          Limpiar criterios
+        </button>
       </div>
 
-      <p className="helper-text">
-        Los filtros se activarán en la actividad 8.
+      <p className="filter-results" role="status">
+        {resultLabel}
       </p>
     </section>
   );

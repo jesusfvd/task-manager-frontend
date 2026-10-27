@@ -4,9 +4,7 @@
  */
 import { Task } from '../models/Task';
 
-/**
- * Array de tareas semilla para demostrar el renderizado dinámico
- */
+
 export const seedTasks: Task[] = [
   {
     id: '1',

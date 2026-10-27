@@ -325,6 +325,51 @@ p { margin-top: 0; }
   color: #64748b;
 }
 
+/* ========================================
+   A8: Validación accesible
+   ======================================== */
+.field-error {
+  margin: 0;
+  color: #9b1c1c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+input[aria-invalid='true'] {
+  border-color: #9b1c1c;
+  outline-color: #9b1c1c;
+}
+
+/* ========================================
+   A8: Controles de filtros
+   ======================================== */
+.filters-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(170px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.filter-field span {
+  font-weight: 700;
+}
+
+.filter-field input,
+.filter-field select {
+  width: 100%;
+}
+
+.filter-results {
+  min-height: 1.4rem;
+  margin: 1rem 0 0;
+  color: #4b5563;
+}
+
 @media (max-width: 720px) {
   .app-header { padding-block: 2.25rem; }
 
