@@ -1,16 +1,11 @@
-/**
- * Utilidad de validación para tareas
- * EC2 F3 A8 - Validación reutilizable
- */
 
-/** Longitud máxima permitida para el título de una tarea */
 export const TASK_TITLE_MAX_LENGTH = 120;
 
 /**
  * Valida el título de una tarea
  * 
  * @param value - Título a validar
- * @returns Mensaje de error si la validación falla, null si es válido
+ * @returns 
  * 
  * Reglas:
  * - No puede estar vacío (después de trim)

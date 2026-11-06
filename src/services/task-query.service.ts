@@ -1,7 +1,4 @@
-/**
- * Servicio de consulta de tareas
- * EC2 F3 A8 - Búsqueda, filtros y ordenamiento
- */
+
 import type { Task } from '../models/Task';
 import type {
   TaskSort,
@@ -16,10 +13,10 @@ const titleCollator = new Intl.Collator('es-MX', {
 /**
  * Función de comparación para ordenar tareas
  * 
- * @param firstTask - Primera tarea a comparar
- * @param secondTask - Segunda tarea a comparar
- * @param sortBy - Criterio de ordenamiento
- * @returns Número negativo, cero o positivo según el orden
+ * @param firstTask 
+ * @param secondTask 
+ * @param sortBy 
+ * @returns 
  */
 function compareTasks(
   firstTask: Task,
@@ -49,13 +46,13 @@ function compareTasks(
 }
 
 /**
- * Obtiene las tareas visibles según los criterios de búsqueda, filtro y ordenamiento
  * 
- * NO modifica el array original - Todas las operaciones son inmutables
  * 
- * @param tasks - Colección completa de tareas
- * @param options - Criterios de consulta
- * @returns Array filtrado y ordenado de tareas visibles
+ * 
+ * 
+ * @param tasks 
+ * @param options 
+ * @returns 
  */
 export function getVisibleTasks(
   tasks: Task[],

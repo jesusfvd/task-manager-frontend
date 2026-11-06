@@ -1,7 +1,4 @@
-/**
- * Componente TaskFilters - Controles de búsqueda, filtro y ordenamiento
- * EC2 F3 A8 - Consulta controlada de tareas
- */
+
 import type {
   TaskFilter,
   TaskSort,

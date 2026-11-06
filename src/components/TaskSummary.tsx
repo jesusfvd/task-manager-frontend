@@ -12,7 +12,6 @@ export function TaskSummary({ tasks }: TaskSummaryProps) {
   // Cálculos dinámicos usando filter()
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.status === 'completed').length;
-  const inProgressTasks = tasks.filter((task) => task.status === 'in-progress').length;
   const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
 
   return (
@@ -23,18 +22,13 @@ export function TaskSummary({ tasks }: TaskSummaryProps) {
       </article>
 
       <article className="summary-card">
-        <span>Pendientes</span>
-        <strong>{pendingTasks}</strong>
-      </article>
-
-      <article className="summary-card">
-        <span>En progreso</span>
-        <strong>{inProgressTasks}</strong>
-      </article>
-
-      <article className="summary-card">
         <span>Completadas</span>
         <strong>{completedTasks}</strong>
+      </article>
+
+      <article className="summary-card">
+        <span>Pendientes</span>
+        <strong>{pendingTasks}</strong>
       </article>
     </section>
   );

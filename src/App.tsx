@@ -1,19 +1,26 @@
 /**
  * Componente principal App
- * EC2 F3 A8 - Validación, búsqueda, filtros y persistencia local
+ * EC3 F1 A9 - Navegación, rutas y persistencia local
  */
-import { useEffect, useState } from 'react';
-import { AppHeader } from './components/AppHeader';
-import { TaskFilters } from './components/TaskFilters';
-import { TaskForm } from './components/TaskForm';
-import { TaskList } from './components/TaskList';
-import { TaskSummary } from './components/TaskSummary';
+import {
+  useEffect,
+  useState,
+} from 'react';
+import {
+  Route,
+  Routes,
+} from 'react-router';
 import { seedTasks } from './data/seedTasks';
+import { AppLayout } from './layouts/AppLayout';
 import type { Task } from './models/Task';
 import type {
   TaskFilter,
   TaskSort,
 } from './models/task-view.types';
+import { HomePage } from './pages/HomePage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { TaskDetailPage } from './pages/TaskDetailPage';
+import { TasksPage } from './pages/TasksPage';
 import { getVisibleTasks } from './services/task-query.service';
 import {
   loadTasks,
@@ -21,9 +28,10 @@ import {
 } from './services/task-storage.service';
 
 export default function App() {
-  const [tasks, setTasks] = useState<Task[]>(() =>
-    loadTasks(seedTasks),
-  );
+  const [tasks, setTasks] =
+    useState<Task[]>(() =>
+      loadTasks(seedTasks),
+    );
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] =
@@ -35,21 +43,25 @@ export default function App() {
     saveTasks(tasks);
   }, [tasks]);
 
-  const visibleTasks = getVisibleTasks(tasks, {
-    query,
-    filter,
-    sortBy,
-  });
+  const visibleTasks =
+    getVisibleTasks(tasks, {
+      query,
+      filter,
+      sortBy,
+    });
 
-  // Mensaje personalizado según contexto
   const hasActiveCriteria =
-    query.trim() !== '' || filter !== 'all';
+    query.trim() !== '' ||
+    filter !== 'all';
 
-  const emptyMessage = hasActiveCriteria
-    ? 'No hay tareas que coincidan con la búsqueda y el filtro.'
-    : 'Utiliza el formulario para registrar una nueva actividad.';
+  const emptyMessage =
+    hasActiveCriteria
+      ? 'No hay tareas que coincidan con la búsqueda y el filtro.'
+      : 'Utiliza el formulario para registrar una nueva actividad.';
 
-  function handleAddTask(title: string) {
+  function handleAddTask(
+    title: string,
+  ): void {
     const now = new Date().toISOString();
 
     const newTask: Task = {
@@ -66,7 +78,9 @@ export default function App() {
     ]);
   }
 
-  function handleToggleStatus(id: string) {
+  function handleToggleStatus(
+    id: string,
+  ): void {
     const now = new Date().toISOString();
 
     setTasks((currentTasks) =>
@@ -90,7 +104,7 @@ export default function App() {
   function handleEditTask(
     id: string,
     title: string,
-  ) {
+  ): void {
     const now = new Date().toISOString();
 
     setTasks((currentTasks) =>
@@ -106,13 +120,15 @@ export default function App() {
     );
   }
 
-  function handleDeleteTask(id: string) {
+  function handleDeleteTask(
+    id: string,
+  ): boolean {
     const selectedTask = tasks.find(
       (task) => task.id === id,
     );
 
     if (!selectedTask) {
-      return;
+      return false;
     }
 
     const shouldDelete = window.confirm(
@@ -120,12 +136,16 @@ export default function App() {
     );
 
     if (!shouldDelete) {
-      return;
+      return false;
     }
 
     setTasks((currentTasks) =>
-      currentTasks.filter((task) => task.id !== id),
+      currentTasks.filter(
+        (task) => task.id !== id,
+      ),
     );
+
+    return true;
   }
 
   function handleClearCriteria(): void {
@@ -135,36 +155,50 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
-      <AppHeader />
-
-      <main className="app-main">
-        <TaskForm onAddTask={handleAddTask} />
-        <TaskFilters
-          query={query}
-          filter={filter}
-          sortBy={sortBy}
-          resultCount={visibleTasks.length}
-          onQueryChange={setQuery}
-          onFilterChange={setFilter}
-          onSortChange={setSortBy}
-          onClear={handleClearCriteria}
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route
+          index
+          element={<HomePage tasks={tasks} />}
         />
-        <TaskSummary tasks={tasks} />
-        <TaskList
-          tasks={visibleTasks}
-          emptyMessage={emptyMessage}
-          onToggleStatus={handleToggleStatus}
-          onEditTask={handleEditTask}
-          onDeleteTask={handleDeleteTask}
-        />
-      </main>
 
-      <footer className="app-footer">
-        <div className="app-footer__content">
-          <p>Administrador de tareas - Frontend EC2</p>
-        </div>
-      </footer>
-    </div>
+        <Route
+          path="tasks"
+          element={
+            <TasksPage
+              tasks={tasks}
+              visibleTasks={visibleTasks}
+              query={query}
+              filter={filter}
+              sortBy={sortBy}
+              emptyMessage={emptyMessage}
+              onAddTask={handleAddTask}
+              onQueryChange={setQuery}
+              onFilterChange={setFilter}
+              onSortChange={setSortBy}
+              onClearCriteria={handleClearCriteria}
+              onToggleStatus={handleToggleStatus}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+            />
+          }
+        />
+
+        <Route
+          path="tasks/:taskId"
+          element={
+            <TaskDetailPage
+              tasks={tasks}
+              onDeleteTask={handleDeleteTask}
+            />
+          }
+        />
+
+        <Route
+          path="*"
+          element={<NotFoundPage />}
+        />
+      </Route>
+    </Routes>
   );
 }

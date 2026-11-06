@@ -74,12 +74,11 @@ export function loadTasks(
 /**
  * Guarda las tareas en localStorage
  * 
- * @param tasks - Array de tareas a guardar
+ * @param tasks 
+ *
  * 
- * Manejo de errores:
- * - Captura excepciones (cuota excedida, localStorage deshabilitado)
- * - Registra el error en consola
- * - No detiene la aplicación
+ * 
+ * 
  */
 export function saveTasks(tasks: Task[]): void {
   try {
