@@ -1,53 +1,28 @@
-
-import type {
-  TaskFilter,
-  TaskSort,
-} from '../models/task-view.types';
+import type { TaskFilter } from '../models/task-view.types';
 
 interface TaskFiltersProps {
-  query: string;
-  filter: TaskFilter;
-  sortBy: TaskSort;
-  resultCount: number;
-  onQueryChange: (value: string) => void;
-  onFilterChange: (value: TaskFilter) => void;
-  onSortChange: (value: TaskSort) => void;
+  search: string;
+  status: TaskFilter;
+  onSearchChange: (value: string) => void;
+  onStatusChange: (value: TaskFilter) => void;
   onClear: () => void;
 }
 
 export function TaskFilters({
-  query,
-  filter,
-  sortBy,
-  resultCount,
-  onQueryChange,
-  onFilterChange,
-  onSortChange,
+  search,
+  status,
+  onSearchChange,
+  onStatusChange,
   onClear,
 }: TaskFiltersProps) {
-  const hasActiveCriteria =
-    query.trim() !== '' ||
-    filter !== 'all' ||
-    sortBy !== 'updated-desc';
-
-  const resultLabel =
-    resultCount === 1
-      ? '1 resultado visible.'
-      : `${resultCount} resultados visibles.`;
+  const hasActiveCriteria = search.trim() !== '' || status !== 'all';
 
   return (
-    <section
-      className="panel"
-      aria-labelledby="task-filters-title"
-    >
+    <section className="panel" aria-labelledby="task-filters-title">
       <div className="section-heading">
         <div>
-          <p className="section-heading__eyebrow">
-            Consulta
-          </p>
-          <h2 id="task-filters-title">
-            Buscar y organizar
-          </h2>
+          <p className="section-heading__eyebrow">Consulta</p>
+          <h2 id="task-filters-title">Buscar y organizar</h2>
         </div>
       </div>
 
@@ -56,62 +31,29 @@ export function TaskFilters({
           <span>Buscar por título</span>
           <input
             type="search"
-            value={query}
+            value={search}
             placeholder="Ejemplo: documentación"
-            onChange={(event) =>
-              onQueryChange(event.target.value)
-            }
+            onChange={(event) => onSearchChange(event.target.value)}
           />
         </label>
 
         <label className="filter-field">
           <span>Estado</span>
           <select
-            value={filter}
-            onChange={(event) =>
-              onFilterChange(
-                event.target.value as TaskFilter,
-              )
-            }
+            value={status}
+            onChange={(event) => onStatusChange(event.target.value as TaskFilter)}
           >
             <option value="all">Todas</option>
             <option value="pending">Pendientes</option>
+            <option value="in_progress">En progreso</option>
             <option value="completed">Completadas</option>
           </select>
         </label>
 
-        <label className="filter-field">
-          <span>Ordenar por</span>
-          <select
-            value={sortBy}
-            onChange={(event) =>
-              onSortChange(event.target.value as TaskSort)
-            }
-          >
-            <option value="updated-desc">
-              Actualización reciente
-            </option>
-            <option value="created-desc">
-              Creación reciente
-            </option>
-            <option value="title-asc">
-              Título A a Z
-            </option>
-          </select>
-        </label>
-
-        <button
-          type="button"
-          onClick={onClear}
-          disabled={!hasActiveCriteria}
-        >
+        <button type="button" onClick={onClear} disabled={!hasActiveCriteria}>
           Limpiar criterios
         </button>
       </div>
-
-      <p className="filter-results" role="status">
-        {resultLabel}
-      </p>
     </section>
   );
 }

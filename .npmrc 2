@@ -1,0 +1,5 @@
+registry=https://registry.npmjs.org/
+strict-ssl=false
+auto-install-peers=true
+shamefully-hoist=true
+@jsr:registry=https://registry.npmjs.org/

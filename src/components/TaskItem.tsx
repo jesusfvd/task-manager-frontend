@@ -1,75 +1,113 @@
 /**
  * Componente TaskItem - Representa una tarea individual
- * EC3 F1 A9 - Navegación con Link y formato de fecha reutilizable
+ * EC3 F2 A10 - Consumo de API REST (operaciones async)
  */
-import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import type { Task } from '../models/Task';
-import {
-  TASK_TITLE_MAX_LENGTH,
-  validateTaskTitle,
-} from '../utils/task-validation';
+import { taskApiService } from '../services/task.api.service';
 import { formatTaskDate } from '../utils/date';
+import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '../utils/task-validation';
 
 interface TaskItemProps {
   task: Task;
-  onToggleStatus: (id: string) => void;
-  onEditTask: (id: string, title: string) => void;
-  onDeleteTask: (id: string) => boolean;
+  onMutated: () => void;
 }
 
-export function TaskItem({
-  task,
-  onToggleStatus,
-  onEditTask,
-  onDeleteTask,
-}: TaskItemProps) {
-  const { id, title, status, updatedAt } = task;
+const STATUS_LABELS: Record<Task['status'], string> = {
+  pending: 'Pendiente',
+  in_progress: 'En progreso',
+  completed: 'Completada',
+};
+
+const NEXT_STATUS: Record<Task['status'], Task['status']> = {
+  pending: 'in_progress',
+  in_progress: 'completed',
+  completed: 'pending',
+};
+
+const TOGGLE_LABELS: Record<Task['status'], string> = {
+  pending: 'Iniciar',
+  in_progress: 'Completar',
+  completed: 'Reabrir',
+};
+
+export function TaskItem({ task, onMutated }: TaskItemProps) {
+  const { _id, title, status, updatedAt } = task;
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(title);
-  const [error, setError] = useState('');
-
-  const statusLabel =
-    status === 'completed'
-      ? 'Completada'
-      : 'Pendiente';
+  const [fieldError, setFieldError] = useState('');
+  const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState('');
 
   function handleStartEdit() {
     setDraftTitle(title);
-    setError('');
+    setFieldError('');
+    setMutationError('');
     setIsEditing(true);
   }
 
   function handleCancelEdit() {
     setDraftTitle(title);
-    setError('');
+    setFieldError('');
     setIsEditing(false);
   }
 
   function handleDraftChange(value: string): void {
     setDraftTitle(value);
-    if (error) {
-      setError(validateTaskTitle(value) ?? '');
+    if (fieldError) {
+      setFieldError(validateTaskTitle(value) ?? '');
     }
   }
 
-  function handleEditSubmit(
+  async function handleEditSubmit(
     event: FormEvent<HTMLFormElement>,
-  ) {
+  ): Promise<void> {
     event.preventDefault();
-
-    const validationMessage =
-      validateTaskTitle(draftTitle);
-
+    const validationMessage = validateTaskTitle(draftTitle);
     if (validationMessage) {
-      setError(validationMessage);
+      setFieldError(validationMessage);
       return;
     }
+    setIsMutating(true);
+    setMutationError('');
+    try {
+      await taskApiService.updateTask(_id, { title: draftTitle.trim() });
+      setFieldError('');
+      setIsEditing(false);
+      onMutated();
+    } catch {
+      setMutationError('No se pudo guardar el cambio. Intenta de nuevo.');
+    } finally {
+      setIsMutating(false);
+    }
+  }
 
-    onEditTask(id, draftTitle.trim());
-    setError('');
-    setIsEditing(false);
+  async function handleToggleStatus(): Promise<void> {
+    setIsMutating(true);
+    setMutationError('');
+    try {
+      await taskApiService.updateTask(_id, { status: NEXT_STATUS[status] });
+      onMutated();
+    } catch {
+      setMutationError('No se pudo cambiar el estado. Intenta de nuevo.');
+    } finally {
+      setIsMutating(false);
+    }
+  }
+
+  async function handleDelete(): Promise<void> {
+    if (!window.confirm(`¿Eliminar la tarea "${title}"?`)) return;
+    setIsMutating(true);
+    setMutationError('');
+    try {
+      await taskApiService.deleteTask(_id);
+      onMutated();
+    } catch {
+      setMutationError('No se pudo eliminar la tarea. Intenta de nuevo.');
+      setIsMutating(false);
+    }
   }
 
   return (
@@ -84,62 +122,48 @@ export function TaskItem({
             onSubmit={handleEditSubmit}
             noValidate
           >
-            <label
-              className="sr-only"
-              htmlFor={`edit-task-${id}`}
-            >
+            <label className="sr-only" htmlFor={`edit-task-${_id}`}>
               Editar título de la tarea
             </label>
             <input
-              id={`edit-task-${id}`}
+              id={`edit-task-${_id}`}
               className="task-item__edit-input"
               value={draftTitle}
               maxLength={TASK_TITLE_MAX_LENGTH}
-              onChange={(event) =>
-                handleDraftChange(event.target.value)
-              }
-              aria-invalid={Boolean(error)}
-              aria-describedby={
-                error ? `edit-error-${id}` : undefined
-              }
+              onChange={(event) => handleDraftChange(event.target.value)}
+              disabled={isMutating}
+              aria-invalid={Boolean(fieldError)}
+              aria-describedby={fieldError ? `edit-error-${_id}` : undefined}
               autoFocus
             />
-            {error && (
-              <p
-                id={`edit-error-${id}`}
-                className="field-error"
-                role="alert"
-              >
-                {error}
+            {fieldError && (
+              <p id={`edit-error-${_id}`} className="field-error" role="alert">
+                {fieldError}
               </p>
             )}
             <div className="task-item__edit-actions">
-              <button type="submit">Guardar</button>
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-              >
+              <button type="submit" disabled={isMutating} aria-busy={isMutating}>
+                {isMutating ? 'Guardando…' : 'Guardar'}
+              </button>
+              <button type="button" onClick={handleCancelEdit} disabled={isMutating}>
                 Cancelar
               </button>
             </div>
           </form>
         ) : (
           <>
-            <h3 className="task-item__title">
-              {title}
-            </h3>
-            <span
-              className={`status-badge status-badge--${status}`}
-            >
-              {statusLabel}
+            <h3 className="task-item__title">{title}</h3>
+            <span className={`status-badge status-badge--${status}`}>
+              {STATUS_LABELS[status]}
             </span>
             <p className="task-item__date">
               Actualizada:{' '}
-              <time dateTime={updatedAt}>
-                {formatTaskDate(updatedAt)}
-              </time>
+              <time dateTime={updatedAt}>{formatTaskDate(updatedAt)}</time>
             </p>
           </>
+        )}
+        {mutationError && (
+          <p className="field-error" role="alert">{mutationError}</p>
         )}
       </div>
 
@@ -151,34 +175,32 @@ export function TaskItem({
         {!isEditing && (
           <Link
             className="button-link button-link--secondary"
-            to={`/tasks/${id}`}
+            to={`/tasks/${_id}`}
           >
             Ver detalle
           </Link>
         )}
         <button
           type="button"
-          onClick={() => onToggleStatus(id)}
-          disabled={isEditing}
+          onClick={handleToggleStatus}
+          disabled={isEditing || isMutating}
+          aria-busy={isMutating}
         >
-          {status === 'completed'
-            ? 'Reabrir'
-            : 'Completar'}
+          {TOGGLE_LABELS[status]}
         </button>
         <button
           type="button"
           onClick={handleStartEdit}
-          disabled={isEditing}
+          disabled={isEditing || isMutating}
         >
           Editar
         </button>
         <button
           type="button"
           className="button-danger"
-          onClick={() => {
-            onDeleteTask(id);
-          }}
-          disabled={isEditing}
+          onClick={handleDelete}
+          disabled={isEditing || isMutating}
+          aria-busy={isMutating}
         >
           Eliminar
         </button>

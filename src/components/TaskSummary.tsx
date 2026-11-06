@@ -1,34 +1,21 @@
 /**
- * Componente TaskSummary - Resumen estadístico de tareas
- * EC2 F1 A6 - Cálculo dinámico con filter() y array methods
+ * Componente TaskSummary - Resumen de tareas desde la API
+ * EC3 F2 A10 - Usa PageMeta en lugar de array local
  */
-import { Task } from '../models/Task';
+import type { PageMeta } from '../models/api.types';
 
 interface TaskSummaryProps {
-  tasks: Task[];
+  meta: PageMeta | null;
 }
 
-export function TaskSummary({ tasks }: TaskSummaryProps) {
-  // Cálculos dinámicos usando filter()
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((task) => task.status === 'completed').length;
-  const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
+export function TaskSummary({ meta }: TaskSummaryProps) {
+  const total = meta?.total ?? '—';
 
   return (
     <section className="summary-grid" aria-label="Resumen de tareas">
       <article className="summary-card">
-        <span>Total</span>
-        <strong>{totalTasks}</strong>
-      </article>
-
-      <article className="summary-card">
-        <span>Completadas</span>
-        <strong>{completedTasks}</strong>
-      </article>
-
-      <article className="summary-card">
-        <span>Pendientes</span>
-        <strong>{pendingTasks}</strong>
+        <span>Total en servidor</span>
+        <strong>{total}</strong>
       </article>
     </section>
   );
