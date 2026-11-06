@@ -2,7 +2,7 @@ services:
   - type: web
     name: task-manager-frontend
     runtime: static
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm verify
+    buildCommand: pnpm install --frozen-lockfile && pnpm verify
     staticPublishPath: ./dist
     routes:
       - type: rewrite
