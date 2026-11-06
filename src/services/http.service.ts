@@ -1,8 +1,9 @@
 /**
  * Cliente HTTP base con Fetch API
- * EC3 F2 A10 - Consumo de API REST
+ * EC3 F3 A11 - Consumo de API REST con autenticación Bearer
  */
 import { API_URL } from '../config/env';
+import { authService } from './authService';
 
 export class HttpError extends Error {
   constructor(
@@ -32,6 +33,12 @@ async function httpClient<T>(
     Accept: 'application/json',
   };
 
+  // Agregar token Bearer si existe
+  const token = authService.getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const init: RequestInit = {
     method,
     headers,
@@ -52,6 +59,17 @@ async function httpClient<T>(
     }
     console.error('[httpClient] Error de red:', error);
     throw new HttpError(0, 'Error de conexión. Verifica tu red e intenta de nuevo.');
+  }
+
+  // Handle 401 - Unauthorized (sesión inválida)
+  if (response.status === 401) {
+    authService.clearToken();
+    throw new HttpError(401, 'Sesión expirada. Por favor, inicia sesión de nuevo.');
+  }
+
+  // Handle 403 - Forbidden (sin permisos)
+  if (response.status === 403) {
+    throw new HttpError(403, 'No tienes permiso para realizar esta acción.');
   }
 
   if (response.status === 204) {

@@ -1,6 +1,7 @@
 /**
  * Componente TaskItem - Representa una tarea individual
  * EC3 F2 A10 - Consumo de API REST (operaciones async)
+ * EC3 F3 A11 - Botón delete visible solo para admin
  */
 import type { FormEvent } from 'react';
 import { useState } from 'react';
@@ -9,6 +10,7 @@ import type { Task } from '../models/Task';
 import { taskApiService } from '../services/task.api.service';
 import { formatTaskDate } from '../utils/date';
 import { TASK_TITLE_MAX_LENGTH, validateTaskTitle } from '../utils/task-validation';
+import { useAuth } from '../hooks/useAuth';
 
 interface TaskItemProps {
   task: Task;
@@ -35,11 +37,15 @@ const TOGGLE_LABELS: Record<Task['status'], string> = {
 
 export function TaskItem({ task, onMutated }: TaskItemProps) {
   const { _id, title, status, updatedAt } = task;
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(title);
   const [fieldError, setFieldError] = useState('');
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState('');
+
+  // Solo admin puede ver el botón de eliminar
+  const canDelete = user?.role === 'admin';
 
   function handleStartEdit() {
     setDraftTitle(title);
@@ -195,15 +201,17 @@ export function TaskItem({ task, onMutated }: TaskItemProps) {
         >
           Editar
         </button>
-        <button
-          type="button"
-          className="button-danger"
-          onClick={handleDelete}
-          disabled={isEditing || isMutating}
-          aria-busy={isMutating}
-        >
-          Eliminar
-        </button>
+        {canDelete && (
+          <button
+            type="button"
+            className="button-danger"
+            onClick={handleDelete}
+            disabled={isEditing || isMutating}
+            aria-busy={isMutating}
+          >
+            Eliminar
+          </button>
+        )}
       </div>
     </article>
   );
